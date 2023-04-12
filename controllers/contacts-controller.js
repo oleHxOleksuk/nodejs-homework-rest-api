@@ -2,39 +2,52 @@ const { HttpError } = require("../helpers");
 
 const { ctrlWrapper } = require("../utils");
 
-const contacts = require("../models/contacts");
+const Contact = require("../models/contact")
 
-const getAllContcts = async (req, res) => {
-  const result = await contacts.listContacts();
+const getAllContacts = async (req, res) => {
+  const result = await Contact.find();
   res.json(result);
 };
 
 const getContactById = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contacts.getContactById(contactId);
+  const result = await Contact.findById(contactId);
   if (!result) {
-    throw HttpError(404, `Contact with ${contactId} not found`);
+    throw HttpError(404, `Contact whith id: ${contactId} not found`);
   }
   res.json(result);
 };
 
 const addContact = async (req, res) => {
-  const result = await contacts.add(req.body)
+  const result = await Contact.create(req.body);
   res.status(201).json(result);
 };
 
 const removeContact = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contacts.removeContact(contactId);
+  const result = await Contact.findByIdAndDelete(contactId);
   if (!result) {
     throw HttpError(404, `Contact whith id: ${contactId} not found`);
   }
   res.json({ message: "Delete success" });
 };
 
-const updateContact = async (req, res) => {
+const changeContact = async (req, res) => {
   const { contactId } = req.params;
-  const result = await contacts.updateContact(contactId, req.body);
+  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
+    new: true,
+  });
+  if (!result) {
+    throw HttpError(404, `Contact whith id: ${contactId} not found`);
+  }
+  res.json(result);
+};
+
+const updateFavorite = async (req, res) => {
+  const { contactId } = req.params;
+  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
+    new: true,
+  });
   if (!result) {
     throw HttpError(404, `Contact whith id: ${contactId} not found`);
   }
@@ -42,9 +55,10 @@ const updateContact = async (req, res) => {
 };
 
 module.exports = {
-  getAllContcts: ctrlWrapper(getAllContcts),
+  getAllContacts: ctrlWrapper(getAllContacts),
   getContactById: ctrlWrapper(getContactById),
   addContact: ctrlWrapper(addContact),
   removeContact: ctrlWrapper(removeContact),
-  updateContact: ctrlWrapper(updateContact),
+  changeContact: ctrlWrapper(changeContact),
+  updateFavorite: ctrlWrapper(updateFavorite),
 };
