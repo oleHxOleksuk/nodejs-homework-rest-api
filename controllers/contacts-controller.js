@@ -5,10 +5,17 @@ const { ctrlWrapper } = require("../utils");
 const {Contact} = require("../models/contact")
 
 const getAllContacts = async (req, res) => {
-  const {_id: owner} = req.user;
-  const {page = 1, limit = 10} = req.query;
-  const skip = (page - 1) * limit
-  const result = await Contact.find({owner}, "-createdAt -updatedAt", {skip, limit}).populate("owner", "name email");
+  const { _id: owner } = req.user;
+  const { page = 1, limit = 20, favorite } = req.query;
+  const skip = (page - 1) * limit;
+  const query = { owner };
+  if (favorite) {
+    query.favorite = favorite;
+  }
+  const result = await Contact.find(query, "", {
+    skip,
+    limit,
+  }).populate("owner", "email");
   res.json(result);
 };
 

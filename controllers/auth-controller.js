@@ -17,8 +17,8 @@ const register = async(req, res) => {
     const result = await User.create({...req.body, password: hashPassword});
 
     res.status(201).json({
-        name: result.name,
         email: result.email,
+        subscription: result.subscription,
     })
 }
 
@@ -41,12 +41,23 @@ const login = async(req, res) => {
 }
 
 const getCurrent = async(req, res) => {
-    const {name, email} = req.user;
+    const {email,subscription} = req.user;
     res.json({
-        name,
-        email
+        email,
+        subscription,
     })
 }
+
+const updateSubscription = async (req, res) => {
+    const { subscription } = req.user;
+    const result = await User.findOneAndUpdate(subscription, req.body, {
+      new: true,
+    });
+    if (!result) {
+      throw HttpError(404);
+    }
+    res.json(result);
+  };
 
 const logout = async(req, res) => {
     const {_id} = req.user;
@@ -61,4 +72,5 @@ module.exports = {
     login: ctrlWrapper(login),
     getCurrent: ctrlWrapper(getCurrent),
     logout: ctrlWrapper(logout),
+    updateSubscription: ctrlWrapper(updateSubscription),
 }
